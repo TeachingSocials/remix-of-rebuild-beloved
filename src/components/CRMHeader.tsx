@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import logo from "@/assets/teaching-socials-logo.png";
 
 interface NavItem {
   label: string;
@@ -46,18 +47,13 @@ export function CRMHeader({ visible }: CRMHeaderProps) {
       {/* Logo */}
       <div
         style={{
-          fontFamily: "'Orbitron', sans-serif",
-          fontSize: "13px",
-          fontWeight: 700,
-          letterSpacing: "0.15em",
-          color: "hsl(38 28% 67%)",
           filter: "drop-shadow(0 0 10px rgba(192,173,148,0.5))",
           opacity: visible ? 1 : 0,
           transition: "opacity 0.5s ease 0.3s",
           whiteSpace: "nowrap",
         }}
       >
-        TS<span style={{ color: "rgba(221,227,235,0.4)", fontWeight: 300 }}>_CRM</span>
+        <img src={logo} alt="Teaching Socials" style={{ height: "32px", width: "auto" }} />
       </div>
 
       {/* Divider */}

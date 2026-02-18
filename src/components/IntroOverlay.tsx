@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import logo from "@/assets/teaching-socials-logo.png";
 
 interface IntroOverlayProps {
   onComplete: () => void;
@@ -88,11 +89,6 @@ export function IntroOverlay({ onComplete }: IntroOverlayProps) {
         <div className="relative z-10">
           <div
             style={{
-              fontFamily: "'Orbitron', sans-serif",
-              fontSize: "32px",
-              fontWeight: 700,
-              letterSpacing: "0.15em",
-              color: "hsl(38 28% 67%)",
               textAlign: "center",
               opacity: logoVisible ? 1 : 0,
               transition: "opacity 0.5s ease",
@@ -105,11 +101,11 @@ export function IntroOverlay({ onComplete }: IntroOverlayProps) {
               padding: "40px 60px",
             }}
           >
-            TEACHING
-            <br />
-            <span style={{ fontSize: "14px", letterSpacing: "0.4em", color: "hsl(210 25% 83%)", fontWeight: 400 }}>
-              SOCIALS
-            </span>
+            <img
+              src={logo}
+              alt="Teaching Socials"
+              style={{ width: "280px", height: "auto", display: "block", margin: "0 auto" }}
+            />
           </div>
         </div>
       </div>

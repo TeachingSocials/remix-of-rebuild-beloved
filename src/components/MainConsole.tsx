@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LogEntry {
   id: number;
@@ -14,20 +15,7 @@ const initialLogs: LogEntry[] = [
 
 let logIdCounter = 2;
 
-function generateLogs(apiKey: string): LogEntry[] {
-  const now = new Date();
-  const ts = () => now.toLocaleTimeString("de-DE", { hour12: false });
 
-  return [
-    { id: logIdCounter++, ts: ts(), type: "info", prefix: "API", message: `VALIDATING KEY: ${apiKey.slice(0, 8)}${"*".repeat(Math.max(0, apiKey.length - 8))}` },
-    { id: logIdCounter++, ts: ts(), type: "info", prefix: "NET", message: "ESTABLISHING SECURE TUNNEL..." },
-    { id: logIdCounter++, ts: ts(), type: "success", prefix: "AUTH", message: "AUTHENTICATION SUCCESSFUL" },
-    { id: logIdCounter++, ts: ts(), type: "info", prefix: "DB", message: "QUERYING CONTACT MATRIX..." },
-    { id: logIdCounter++, ts: ts(), type: "data" as "info", prefix: "DB", message: `CONTACTS LOADED: ${(Math.floor(Math.random() * 5000) + 8000).toLocaleString()} RECORDS` },
-    { id: logIdCounter++, ts: ts(), type: "info", prefix: "CRM", message: "SYNCING SOCIAL GRAPH NODES..." },
-    { id: logIdCounter++, ts: ts(), type: "success", prefix: "SYNC", message: "ALL SYSTEMS OPERATIONAL. READY." },
-  ];
-}
 
 export function MainConsole({ visible }: { visible: boolean }) {
   const [apiKey, setApiKey] = useState("");
@@ -42,15 +30,38 @@ export function MainConsole({ visible }: { visible: boolean }) {
     }
   }, [logs]);
 
+  const addLog = (entry: Omit<LogEntry, "id" | "ts">) => {
+    const ts = new Date().toLocaleTimeString("de-DE", { hour12: false });
+    setLogs((prev) => [...prev, { ...entry, id: logIdCounter++, ts }]);
+  };
+
   const handleExecute = async () => {
     if (running || !apiKey.trim()) return;
     setRunning(true);
     setLogActive(true);
 
-    const newLogs = generateLogs(apiKey);
-    for (let i = 0; i < newLogs.length; i++) {
-      await new Promise((r) => setTimeout(r, 300 + Math.random() * 200));
-      setLogs((prev) => [...prev, newLogs[i]]);
+    addLog({ type: "info", prefix: "API", message: `VALIDATING KEY: ${apiKey.slice(0, 8)}${"*".repeat(Math.max(0, apiKey.length - 8))}` });
+    addLog({ type: "info", prefix: "NET", message: "ESTABLISHING SECURE TUNNEL..." });
+
+    try {
+      const { data, error } = await supabase.functions.invoke("webhook-proxy", {
+        body: { apiKey },
+      });
+
+      if (error) {
+        addLog({ type: "error", prefix: "ERR", message: `REQUEST FAILED: ${error.message}` });
+      } else {
+        addLog({ type: "success", prefix: "AUTH", message: "CONNECTION ESTABLISHED" });
+        addLog({ type: "info", prefix: "HOOK", message: `WEBHOOK RESPONDED — STATUS: ${data?.status ?? "OK"}` });
+        if (data?.data) {
+          const preview = JSON.stringify(data.data).slice(0, 80);
+          addLog({ type: "info", prefix: "DATA", message: `PAYLOAD: ${preview}${preview.length >= 80 ? "..." : ""}` });
+        }
+        addLog({ type: "success", prefix: "SYNC", message: "TRANSMISSION COMPLETE. ALL SYSTEMS OPERATIONAL." });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "UNKNOWN ERROR";
+      addLog({ type: "error", prefix: "ERR", message: `CRITICAL FAILURE: ${msg}` });
     }
 
     setRunning(false);

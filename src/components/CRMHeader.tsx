@@ -6,7 +6,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "DASHBOARD", active: true },
+  { label: "CONSOLE", active: true },
   { label: "CONTACTS", active: false },
   { label: "CAMPAIGNS", active: false },
   { label: "ANALYTICS", active: false },

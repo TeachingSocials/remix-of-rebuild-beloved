@@ -107,52 +107,7 @@ export function MainConsole({ visible }: { visible: boolean }) {
         TEACHING SOCIALS — CONTACT RELATIONSHIP MANAGEMENT SYSTEM v3.2.1
       </p>
 
-      {/* Stats row */}
-      <div style={{ display: "flex", gap: "20px", marginTop: "30px", flexWrap: "wrap" }}>
-        {[
-          { label: "TOTAL CONTACTS", value: "12,847" },
-          { label: "ACTIVE CAMPAIGNS", value: "7" },
-          { label: "OPEN RATE AVG", value: "34.2%" },
-          { label: "SYNC STATUS", value: "LIVE" },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            style={{
-              flex: "1 1 180px",
-              padding: "16px 20px",
-              background: "rgba(23, 40, 56, 0.8)",
-              border: "1px solid rgba(192, 173, 148, 0.25)",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <div style={{ fontSize: "9px", color: "rgba(221,227,235,0.4)", letterSpacing: "0.2em", marginBottom: "8px" }}>
-              {stat.label}
-            </div>
-            <div
-              style={{
-                fontFamily: "'Orbitron', sans-serif",
-                fontSize: "20px",
-                color: "hsl(38 28% 67%)",
-                textShadow: "0 0 20px rgba(192,173,148,0.4)",
-              }}
-            >
-              {stat.value}
-            </div>
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "2px",
-                background: "linear-gradient(90deg, transparent, hsl(38 28% 67%), transparent)",
-                opacity: 0.5,
-              }}
-            />
-          </div>
-        ))}
-      </div>
+
 
       {/* Input Card */}
       <div

@@ -20,7 +20,7 @@ export function IntroOverlay({ onComplete }: IntroOverlayProps) {
   const [floating, setFloating] = useState(false);
   const [terminalVisible, setTerminalVisible] = useState(false);
   const [visibleLines, setVisibleLines] = useState<number[]>([]);
-  const [loaderVisible, setLoaderVisible] = useState(false);
+  const [filledBars, setFilledBars] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
@@ -41,14 +41,17 @@ export function IntroOverlay({ onComplete }: IntroOverlayProps) {
       }, 1700 + i * 220);
     });
 
-    // Loader
-    const t6 = setTimeout(() => setLoaderVisible(true), 1700 + bootLines.length * 220);
+    // Loader bars — reveal one at a time, 300ms apart
+    const loaderStart = 1700 + bootLines.length * 220;
+    Array.from({ length: 8 }, (_, i) => {
+      setTimeout(() => setFilledBars(i + 1), loaderStart + i * 300);
+    });
 
     // Fade out
     const t7 = setTimeout(() => setFadeOut(true), 1700 + bootLines.length * 220 + 2200);
     const t8 = setTimeout(() => onComplete(), 1700 + bootLines.length * 220 + 3000);
 
-    return () => [t1, t2, t3, t4, t5, t6, t7, t8].forEach(clearTimeout);
+    return () => [t1, t2, t3, t4, t5, t7, t8].forEach(clearTimeout);
   }, [onComplete]);
 
   return (
@@ -198,8 +201,6 @@ export function IntroOverlay({ onComplete }: IntroOverlayProps) {
           marginTop: "30px",
           display: "flex",
           gap: "5px",
-          opacity: loaderVisible ? 1 : 0,
-          transition: "opacity 0.3s ease",
         }}
       >
         {Array.from({ length: 8 }, (_, i) => (
@@ -213,17 +214,19 @@ export function IntroOverlay({ onComplete }: IntroOverlayProps) {
               overflow: "hidden",
             }}
           >
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: "-100%",
-                width: "100%",
-                height: "100%",
-                background: "linear-gradient(90deg, hsl(38 28% 67%), hsl(0 0% 96%))",
-                animation: `hexFill 2s ease ${i * 0.15}s forwards`,
-              }}
-            />
+            {filledBars > i && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  background: "linear-gradient(90deg, hsl(38 28% 67%), hsl(0 0% 96%))",
+                  animation: "hexFill 0.25s ease forwards",
+                }}
+              />
+            )}
           </div>
         ))}
       </div>

@@ -64,13 +64,28 @@ export function MainConsole({ visible }: { visible: boolean }) {
       if (error) {
         addLog({ type: "error", prefix: "ERR", message: `REQUEST FAILED: ${error.message}` });
       } else {
-        addLog({ type: "success", prefix: "AUTH", message: "CONNECTION ESTABLISHED" });
-        addLog({ type: "info", prefix: "HOOK", message: `WEBHOOK RESPONDED — STATUS: ${data?.status ?? "OK"}` });
-        if (data?.data) {
-          const preview = JSON.stringify(data.data).slice(0, 80);
-          addLog({ type: "info", prefix: "DATA", message: `PAYLOAD: ${preview}${preview.length >= 80 ? "..." : ""}` });
+        const total = data?.total ?? 9;
+        const succeeded = data?.results?.filter((r: { ok: boolean }) => r.ok).length ?? 0;
+        const failed = total - succeeded;
+
+        addLog({ type: "success", prefix: "AUTH", message: "SECURE TUNNEL ESTABLISHED" });
+        addLog({ type: "info", prefix: "HOOK", message: `DISPATCHING TO ${total} WEBHOOKS IN PARALLEL...` });
+
+        if (data?.results) {
+          data.results.forEach((r: { webhook: number; ok: boolean; status?: number; error?: string }) => {
+            if (r.ok) {
+              addLog({ type: "success", prefix: `WH${String(r.webhook).padStart(2, "0")}`, message: `WEBHOOK ${r.webhook} — STATUS ${r.status} OK` });
+            } else {
+              addLog({ type: "error", prefix: `WH${String(r.webhook).padStart(2, "0")}`, message: `WEBHOOK ${r.webhook} — FAILED${r.error ? `: ${r.error}` : ""}` });
+            }
+          });
         }
-        addLog({ type: "success", prefix: "SYNC", message: "TRANSMISSION COMPLETE. ALL SYSTEMS OPERATIONAL." });
+
+        if (failed === 0) {
+          addLog({ type: "success", prefix: "SYNC", message: `ALL ${total} WEBHOOKS ACKNOWLEDGED. TRANSMISSION COMPLETE.` });
+        } else {
+          addLog({ type: "warn", prefix: "SYNC", message: `${succeeded}/${total} WEBHOOKS OK — ${failed} FAILED` });
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "UNKNOWN ERROR";

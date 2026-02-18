@@ -19,10 +19,23 @@ let logIdCounter = 2;
 
 export function MainConsole({ visible }: { visible: boolean }) {
   const [apiKey, setApiKey] = useState("");
+  const [keyError, setKeyError] = useState("");
   const [logs, setLogs] = useState<LogEntry[]>(initialLogs);
   const [running, setRunning] = useState(false);
   const [logActive, setLogActive] = useState(false);
   const logBodyRef = useRef<HTMLDivElement>(null);
+
+  const isValidKey = apiKey.trim().startsWith("api_") && apiKey.trim().length > 4;
+
+  const handleKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setApiKey(val);
+    if (val && !val.startsWith("api_")) {
+      setKeyError("KEY MUST START WITH api_");
+    } else {
+      setKeyError("");
+    }
+  };
 
   useEffect(() => {
     if (logBodyRef.current) {
@@ -36,7 +49,7 @@ export function MainConsole({ visible }: { visible: boolean }) {
   };
 
   const handleExecute = async () => {
-    if (running || !apiKey.trim()) return;
+    if (running || !isValidKey) return;
     setRunning(true);
     setLogActive(true);
 
@@ -165,14 +178,14 @@ export function MainConsole({ visible }: { visible: boolean }) {
           <input
             type="text"
             value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
+            onChange={handleKeyChange}
             onKeyDown={(e) => e.key === "Enter" && handleExecute()}
-            placeholder="ENTER API KEY..."
+            placeholder="api_xxxxxxxxxxx"
             style={{
               flex: 1,
               padding: "18px 20px",
               background: "rgba(0, 0, 0, 0.4)",
-              border: "1px solid rgba(192, 173, 148, 0.25)",
+              border: `1px solid ${keyError ? "#ff6b6b" : "rgba(192, 173, 148, 0.25)"}`,
               color: "hsl(0 0% 96%)",
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "14px",
@@ -180,17 +193,19 @@ export function MainConsole({ visible }: { visible: boolean }) {
               transition: "all 0.3s ease",
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = "hsl(38 28% 67%)";
-              e.target.style.boxShadow = "0 0 30px rgba(192,173,148,0.3), inset 0 0 20px rgba(192,173,148,0.05)";
+              e.target.style.borderColor = keyError ? "#ff6b6b" : "hsl(38 28% 67%)";
+              e.target.style.boxShadow = keyError
+                ? "0 0 20px rgba(255,107,107,0.2)"
+                : "0 0 30px rgba(192,173,148,0.3), inset 0 0 20px rgba(192,173,148,0.05)";
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = "rgba(192, 173, 148, 0.25)";
+              e.target.style.borderColor = keyError ? "#ff6b6b" : "rgba(192, 173, 148, 0.25)";
               e.target.style.boxShadow = "none";
             }}
           />
           <button
             onClick={handleExecute}
-            disabled={!apiKey.trim() || running}
+            disabled={!isValidKey || running}
             style={{
               padding: "18px 40px",
               background: running ? "hsl(38 28% 67%)" : "transparent",
@@ -199,16 +214,30 @@ export function MainConsole({ visible }: { visible: boolean }) {
               fontFamily: "'Orbitron', sans-serif",
               fontSize: "12px",
               letterSpacing: "0.2em",
-              cursor: apiKey.trim() && !running ? "pointer" : "not-allowed",
+              cursor: isValidKey && !running ? "pointer" : "not-allowed",
               position: "relative",
               overflow: "hidden",
               transition: "all 0.3s ease",
               animation: running ? "btnPulse 0.5s ease-in-out infinite" : "none",
+              opacity: !isValidKey && !running ? 0.4 : 1,
             }}
           >
             {running ? "RUNNING..." : "EXECUTE"}
           </button>
         </div>
+        {keyError && (
+          <div style={{
+            marginTop: "8px",
+            fontSize: "10px",
+            color: "#ff6b6b",
+            letterSpacing: "0.15em",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}>
+            <span>⚠</span> {keyError}
+          </div>
+        )}
       </div>
 
       {/* Log Panel */}

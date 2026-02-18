@@ -1,11 +1,27 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from "react";
+import { CyberGrid, FloatingNodes, Scanlines } from "@/components/CyberBackground";
+import { IntroOverlay } from "@/components/IntroOverlay";
+import { CRMHeader } from "@/components/CRMHeader";
+import { MainConsole } from "@/components/MainConsole";
 
 const Index = () => {
+  const [introComplete, setIntroComplete] = useState(false);
+
+  const handleIntroComplete = useCallback(() => {
+    setIntroComplete(true);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div style={{ minHeight: "100vh", background: "hsl(205 30% 8%)", position: "relative" }}>
+      <CyberGrid />
+      <FloatingNodes />
+      <Scanlines />
+
+      {!introComplete && <IntroOverlay onComplete={handleIntroComplete} />}
+
+      <div style={{ position: "relative", zIndex: 10 }}>
+        <CRMHeader visible={introComplete} />
+        <MainConsole visible={introComplete} />
       </div>
     </div>
   );
